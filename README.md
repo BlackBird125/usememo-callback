@@ -1,46 +1,176 @@
-# Getting Started with Create React App
+# React Hooks (useCallback, useMemo) 基礎学習プロジェクト
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+このプロジェクトは、React の `useCallback` と `useMemo` フックの基本的な使用方法を学ぶためのサンプルアプリケーションです。
 
-## Available Scripts
+## 機能概要
 
-In the project directory, you can run:
+シンプルな Todo リストアプリケーションを通じて、以下の機能とフックの使用方法を学習します：
 
-### `npm start`
+1. タスクの追加と削除
+2. useCallback による関数のメモ化
+3. useMemo による計算結果のメモ化
+4. React のパフォーマンス最適化
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## 実装機能
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+- タスク追加フォーム（入力欄と追加ボタン）
+- タスクリストの表示
+- 各タスクの削除機能
+- タスク数の表示（useMemo で最適化）
+- 削除関数のメモ化（useCallback で最適化）
 
-### `npm test`
+## 技術スタック
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- React 18
+- TypeScript
+- React Hooks
+  - useState
+  - useCallback
+  - useMemo
 
-### `npm run build`
+## プロジェクト構造
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+hooks-basic/
+├── src/
+│   ├── components/
+│   │   ├── TodoItem.tsx   // 個別の Todo アイテムコンポーネント
+│   │   └── TodoList.tsx   // Todo リストコンポーネント
+│   ├── types/
+│   │   └── todo.ts        // 型定義
+│   └── App.tsx           // メインアプリケーション
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## パフォーマンス最適化のポイント
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. **useCallback の使用**
 
-### `npm run eject`
+   ```tsx
+   const handleDelete = useCallback((id: number) => {
+     setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
+   }, []);
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+   - 削除関数をメモ化して不要な再生成を防止
+   - 子コンポーネントの不要な再レンダリングを防止
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+2. **useMemo の使用**
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+   ```tsx
+   const todoCount = useMemo(() => {
+     console.log("Calculating todo count...");
+     return todos.length;
+   }, [todos]);
+   ```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+   - タスク数の計算をメモ化
+   - todos が変更されたときのみ再計算
 
-## Learn More
+3. **React.memo の使用**
+   ```tsx
+   const TodoItem = memo(({ todo, onDelete }) => {
+     // ...
+   });
+   ```
+   - 個別の Todo アイテムコンポーネントをメモ化
+   - props が変更されない限り再レンダリングしない
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 主要なコード例
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+1. **Todo の型定義**
+
+   ```tsx
+   // types/todo.ts
+   export interface Todo {
+     id: number;
+     text: string;
+   }
+   ```
+
+2. **TodoItem コンポーネント**
+
+   ```tsx
+   // components/TodoItem.tsx
+   const TodoItem: React.FC<TodoItemProps> = memo(({ todo, onDelete }) => {
+     console.log(`TodoItem rendered: ${todo.text}`);
+     return (
+       <div>
+         <span>{todo.text}</span>
+         <button onClick={() => onDelete(todo.id)}>削除</button>
+       </div>
+     );
+   });
+   ```
+
+3. **TodoList コンポーネント**
+   ```tsx
+   // components/TodoList.tsx
+   const TodoList: React.FC<TodoListProps> = ({ todos, onDelete }) => {
+     return (
+       <div>
+         {todos.map((todo) => (
+           <TodoItem key={todo.id} todo={todo} onDelete={onDelete} />
+         ))}
+       </div>
+     );
+   };
+   ```
+
+## セットアップ方法
+
+1. 依存パッケージのインストール:
+
+```bash
+npm install
+```
+
+2. 開発サーバーの起動:
+
+```bash
+npm start
+```
+
+アプリケーションは http://localhost:3000 で起動します。
+
+## 学習ポイント
+
+1. **useCallback**
+
+   - 関数のメモ化による最適化
+   - 依存配列の適切な使用
+   - 子コンポーネントへの関数の受け渡し
+
+2. **useMemo**
+
+   - 計算結果のメモ化
+   - 重い計算の最適化
+   - 依存値の変更時のみ再計算
+
+3. **パフォーマンス最適化**
+   - コンポーネントの不要な再レンダリング防止
+   - メモ化による計算コストの削減
+   - React DevTools を使用したパフォーマンスの確認
+
+## デバッグとパフォーマンス確認
+
+1. **コンソールログの確認**
+
+   - `TodoItem rendered: [text]` - 個別のアイテムが再レンダリングされたとき
+   - `Calculating todo count...` - タスク数が再計算されたとき
+
+2. **React DevTools の使用**
+   - コンポーネントの再レンダリングの確認
+   - メモ化が正しく機能しているかの確認
+   - パフォーマンスプロファイリング
+
+## 注意点
+
+- メモ化は常に必要なわけではありません
+- 過度な最適化は避け、必要な場合のみ使用してください
+- コンソールログを確認して、メモ化が正しく機能しているか確認できます
+
+## 参考リンク
+
+- [React 公式ドキュメント - useCallback](https://react.dev/reference/react/useCallback)
+- [React 公式ドキュメント - useMemo](https://react.dev/reference/react/useMemo)
+- [React 公式ドキュメント - パフォーマンス最適化](https://react.dev/learn/render-and-commit)
